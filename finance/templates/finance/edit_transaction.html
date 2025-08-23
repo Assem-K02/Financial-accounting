@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать транзакцию</title>
+</head>
+    <body>
+    <h2>Редактировать транзакцию #{{ txn.id }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить</button>
+        <a href="{% url 'transaction_list' %}">Отмена</a>
+    </form>
+</body>
+</html>

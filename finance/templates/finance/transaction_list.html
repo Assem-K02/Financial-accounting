@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Мои транзакции{% endblock %}
+
+{% block content %}
+<h2>Мои транзакции</h2>
+
+<form method="get" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px;">
+    <label>Категория:</label>
+    <select name="category">
+        <option value="">Все</option>
+        {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                {{ cat.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>С даты:</label>
+    <input type="date" name="start_date" value="{{ request.GET.start_date }}">
+
+    <label>По дату:</label>
+    <input type="date" name="end_date" value="{{ request.GET.end_date }}">
+
+    <button type="submit" style="
+        background: #333; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer;">
+        Фильтровать
+    </button>
+</form>
+
+<hr>
+
+<p><strong>Доходы:</strong> {{ income }}</p>
+<p><strong>Расходы:</strong> {{ expenses }}</p>
+<p><strong>Баланс:</strong> {{ balance }}</p>
+
+<hr>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+    <tr style="background: #f2f2f2;">
+        <th style="border: 1px solid #ccc; padding: 8px;">Дата</th>
+        <th style="border: 1px solid #ccc; padding: 8px;">Категория</th>
+        <th style="border: 1px solid #ccc; padding: 8px;">Тип</th>
+        <th style="border: 1px solid #ccc; padding: 8px;">Сумма</th>
+        <th style="border: 1px solid #ccc; padding: 8px;">Описание</th>
+        <th style="border: 1px solid #ccc; padding: 8px;">Действия</th>
+    </tr>
+    {% for t in transactions %}
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 8px;">{{ t.date }}</td>
+        <td style="border: 1px solid #ccc; padding: 8px;">{{ t.category }}</td>
+        <td style="border: 1px solid #ccc; padding: 8px;">{{ t.get_type_display }}</td>
+        <td style="border: 1px solid #ccc; padding: 8px;">{{ t.amount }}</td>
+        <td style="border: 1px solid #ccc; padding: 8px;">{{ t.description }}</td>
+        <td style="border: 1px solid #ccc; padding: 8px;">
+            <a href="{% url 'edit_transaction' t.id %}">Ред.</a> |
+            <a href="{% url 'delete_transaction' t.id %}">Удал.</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" style="text-align:center; padding:10px;">Нет транзакций</td></tr>
+    {% endfor %}
+</table>
+
+
+<a href="{% url 'add_transaction' %}">Добавить новую</a>
+{% endblock %}

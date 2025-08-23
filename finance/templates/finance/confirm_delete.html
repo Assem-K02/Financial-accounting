@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Удалить транзакцию</title>
+</head>
+<body>
+    <h2>Удалить транзакцию</h2>
+    <p>Вы уверены, что хотите удалить транзакцию:
+       <b>{{ txn.get_type_display }}</b> — {{ txn.amount }} ({{ txn.date }})?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Да, удалить</button>
+        <a href="{% url 'transaction_list' %}">Отмена</a>
+    </form>
+</body>
+</html>

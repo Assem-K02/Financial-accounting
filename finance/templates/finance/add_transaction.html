@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить транзакцию{% endblock %}
+
+{% block content %}
+<h2>Добавить транзакцию</h2>
+<form method="post">
+    {% csrf_token %}
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 400px;">
+        {{ form.as_p }}
+        <button type="submit" style="
+            background: #333;
+            color: white;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;">
+            Сохранить
+        </button>
+    </div>
+</form>
+
+<a href="{% url 'transaction_list' %}">К списку транзакций</a>
+{% endblock %}
