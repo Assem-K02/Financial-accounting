@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models.functions import TruncMonth
+from django.db.models import Sum
 
 from .forms import TransactionForm
 from .models import Transaction, Category
@@ -70,3 +72,58 @@ def delete_transaction(request, pk):
         messages.success(request, 'Транзакция удалена.')
         return redirect('transaction_list')
     return render(request, 'finance/confirm_delete.html', {'txn': txn})
+
+@login_required
+def report_view(request):
+    transactions = Transaction.objects.filter(user=request.user)
+
+    total_income = sum(t.amount for t in transactions if t.type == 'income')
+    total_expense = sum(t.amount for t in transactions if t.type == 'expense')
+    balance = total_income - total_expense
+
+    context = {
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'balance': balance,
+    }
+    return render(request, 'finance/report.html', context)
+
+@login_required
+def report(request):
+    transactions = Transaction.objects.filter(user=request.user)
+
+    total_income = transactions.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = transactions.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+    balance = total_income - total_expense
+
+    # Группировка по месяцам
+    monthly_data = transactions.annotate(month=TruncMonth('date')).values('month', 'type').annotate(
+        total=Sum('amount')
+    ).order_by('month')
+
+    # Подготавливаем данные для графика
+    months = []
+    incomes = []
+    expenses = []
+
+    for entry in monthly_data:
+        month_str = entry['month'].strftime("%Y-%m")
+        if month_str not in months:
+            months.append(month_str)
+            incomes.append(0)
+            expenses.append(0)
+        index = months.index(month_str)
+        if entry['type'] == 'income':
+            incomes[index] = float(entry['total'])
+        else:
+            expenses[index] = float(entry['total'])
+
+    context = {
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'balance': balance,
+        'months': months,
+        'incomes': incomes,
+        'expenses': expenses,
+    }
+    return render(request, 'report.html', context)

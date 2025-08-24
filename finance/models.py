@@ -21,4 +21,5 @@ class Transaction(models.Model):
     description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.get_type_display()} - {self.amount}"
+        category_name = self.category.name if self.category else "Без категории"
+        return f"{self.date}: {self.amount} ₸ — {self.get_type_display()} [{category_name}]"
